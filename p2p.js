@@ -6,10 +6,19 @@ const crypto = require("crypto");
 const Swarm = require("discovery-swarm");
 const defaults = require("dat-swarm-defaults");
 const getPort = require("get-port");
+const chain = require("./chain");
 
 const peers = {};
 let connSeq = 0;
 let channel = "myBlockchain";
+
+// figure out purpose of messages
+// define a switch mechanism so diff message types will be used for diff functions
+// request and receive blocks - allows you to sync new peers that enter the P2P network and sync for any additional blocks you generate after the genesis block creation
+let MessageType = {
+  REQUEST_BLOCK: "requestBlock",
+  RECEIVE_NEXT_BLOCK: "receiveNextBlock",
+};
 
 const myPeerId = crypto.randomBytes(32);
 console.log("myPeerId: " + myPeerId.toString("hex"));
@@ -52,6 +61,34 @@ const swarm = Swarm(config);
         "type: " + JSON.stringify(message.type)
       );
       console.log("----------- Received Message end -------------");
+
+      // handle different types of messages
+      switch (message.type) {
+        case MessageType.REQUEST_BLOCK:
+          console.log("-----------REQUEST_BLOCK START-------------");
+          let requestedIndex = JSON.parse(JSON.stringify(message.data)).index;
+          let requestedBlock = chain.getBlock(requestedIndex);
+          if (requestedBlock)
+            writeMessageToPeerToId(
+              peerId.toString("hex"),
+              MessageType.RECEIVE_NEXT_BLOCK,
+              requestedBlock
+            );
+          else console.log("No block found @ index: " + requestedIndex);
+          console.log("-----------REQUEST_BLOCK END-------------");
+          break;
+        case MessageType.RECEIVE_NEXT_BLOCK:
+          console.log("-----------RECEIVE_NEXT_BLOCK START-------------");
+          chain.addBlock(JSON.parse(JSON.stringify(message.data)));
+          console.log(JSON.stringify(chain.blockchain));
+          let nextBlockIndex = chain.getLatestBlock().index + 1;
+          console.log("-- request next block @ index: " + nextBlockIndex);
+          writeMessageToPeers(MessageType.REQUEST_BLOCK, {
+            index: nextBlockIndex,
+          });
+          console.log("-----------RECEIVE_NEXT_BLOCK START-------------");
+          break;
+      }
     });
 
     // indicates you lost a connection with peers and delete from peers array
@@ -70,10 +107,6 @@ const swarm = Swarm(config);
     connSeq++;
   });
 })();
-
-setTimeout(() => {
-  writeMessageToPeers("hello", null);
-}, 10000);
 
 // send message to all connected peers
 writeMessageToPeers = (type, data) => {
@@ -109,3 +142,14 @@ sendMessage = (id, type, data) => {
     })
   );
 };
+
+// setTimeout(() => {
+//   writeMessageToPeers("hello", null);
+// }, 10000);
+
+//
+setTimeout(() => {
+  writeMessageToPeers(MessageType.REQUEST_BLOCK, {
+    index: chain.getLatestBlock.index + 1,
+  });
+}, 5000);
