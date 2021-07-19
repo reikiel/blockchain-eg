@@ -4,7 +4,7 @@ Block (block.js)
 - blockHeader
 
 BlockHeader
-- version
+- version: Version 1 is the genesis block
 - previousBlockHeader: SHA-256 hash function of the previous block's header. Ensures that the previous block cannot be changed as this block needs to be changed as well
 - merkleRoot: A merkle tree is a binary tree that holds all the hashed pairs of the tree
 - time: Unix epoch time when the miner started hashing the header
