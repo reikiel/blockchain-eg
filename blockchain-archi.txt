@@ -1,0 +1,20 @@
+Block (block.js)
+- index: GensisBlock is the first block, with index value 0
+- txns: Raw transactions in the block. Doesn't have to be crypto but any type of data you want to store
+- blockHeader
+
+BlockHeader
+- version
+- previousBlockHeader: SHA-256 hash function of the previous block's header. Ensures that the previous block cannot be changed as this block needs to be changed as well
+- merkleRoot: A merkle tree is a binary tree that holds all the hashed pairs of the tree
+- time: Unix epoch time when the miner started hashing the header
+* nonce: In a bitcoin block, it is a 32-bit field whose value is adjusted so that the hash of the block will be less than or equal to the current target of the network
+* nBits: Refers to the target, which is a 256-bit number and inversely proportional to the difficulty. Recalculated every 2,016 blocks
+
+Chain (chain.js)
+- getGenesisBlock
+- blockchain
+- addBlock
+- getBlock
+- getLatestBlock
+- generateNextBlock
