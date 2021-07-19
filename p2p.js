@@ -63,3 +63,38 @@ async () => {
     connSeq++;
   });
 };
+
+setTimeout(() => {
+  writeMessageToPeers("hello", null);
+});
+
+writeMessageToPeers = (type, data) => {
+  for (let id in peers) {
+    console.log("-------- writeMessageToPeers start -------- ");
+    console.log("type: " + type + ", to: " + id);
+    console.log("-------- writeMessageToPeers end ----------- ");
+    sendMessage(id, type, data);
+  }
+};
+
+writeMessageToPeerToId = (toId, type, data) => {
+  for (let id in peers) {
+    if (id === toId) {
+      console.log("-------- writeMessageToPeerToId start -------- ");
+      console.log("type: " + type + ", to: " + toId);
+      console.log("-------- writeMessageToPeerToId end ----------- ");
+      sendMessage(id, type, data);
+    }
+  }
+};
+
+sendMessage = (id, type, data) => {
+  peers[id].conn.write(
+    JSON.stringify({
+      to: id,
+      from: myPeerId,
+      type: type,
+      data: data,
+    })
+  );
+};
