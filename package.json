@@ -9,12 +9,14 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "body-parser": "^1.19.0",
     "cron": "^1.8.2",
     "crypto": "^1.0.1",
     "crypto-js": "^4.0.0",
     "dat-swarm-defaults": "^1.0.2",
     "discovery-swarm": "^6.1.0",
     "elliptic": "^6.5.4",
+    "express": "^4.17.1",
     "get-port": "^5.1.1",
     "level": "^7.0.0",
     "moment": "^2.29.1"
