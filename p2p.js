@@ -7,6 +7,9 @@ const Swarm = require("discovery-swarm");
 const defaults = require("dat-swarm-defaults");
 const getPort = require("get-port");
 const CronJob = require("cron").CronJob;
+const express = require("express");
+const bodyParser = require("body-parser");
+const wallet = require("./wallet");
 const chain = require("./chain");
 
 const peers = {};
@@ -34,6 +37,37 @@ console.log("myPeerId: " + myPeerId.toString("hex"));
 
 chain.createDb(myPeerId.toString("hex"));
 
+// for api
+let initHttpServer = (port) => {
+  let http_port = "80" + port.toString().slice(-2);
+  let app = express();
+  app.use(bodyParser.json());
+
+  // retrieve all blocks
+  app.get("/blocks", (req, res) => res.send(JSON.stringify(chain.blockchain)));
+
+  // retrieve one block
+  app.get("/getBlock", (req, res) => {
+    let blockIndex = req.query.index;
+    res.send(chain.blockchain[blockIndex]);
+  });
+
+  // retrieve LevelDB entry based on an index
+  app.get("/getDBBock", (req, res) => {
+    let blockIndex = req.query.index;
+    chain.getDbBlock(blockIndex, res);
+  });
+
+  // utilise wallet.js file to generate keys
+  app.get("/getWallet", (req, res) => {
+    res.send(wallet.initWallet());
+  });
+
+  app.listen(http_port, () =>
+    console.log("Listening http on port: " + http_port)
+  );
+};
+
 const config = defaults({
   id: myPeerId,
 });
@@ -43,6 +77,8 @@ const swarm = Swarm(config);
 // async function to continuously monitor swarm.on event messages
 (async () => {
   const port = await getPort();
+
+  initHttpServer(port);
 
   swarm.listen(port);
   console.log("Listening port: " + port);
