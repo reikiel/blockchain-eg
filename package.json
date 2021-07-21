@@ -9,6 +9,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "cron": "^1.8.2",
     "crypto": "^1.0.1",
     "dat-swarm-defaults": "^1.0.2",
     "discovery-swarm": "^6.1.0",
